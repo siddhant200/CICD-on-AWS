@@ -10,7 +10,7 @@ phases:
     runtime-versions:
       docker: 28
     commands: 
-      -echo "installing dependecies"
+      -echo "installing dependencies"
       -yum install -y openssh
   pre_build:
     commands:
