@@ -2,30 +2,36 @@ version: 0.2
 
 env:
   parameter-store:
-   ec2_username: ec2_username
-   ec2_public_ip: ec2_public_ip
-   ec2_pem_key: ec2_key_pem
+    ec2_username: ec2_username
+    ec2_public_ip: ec2_public_ip
+    ec2_pem_key: ec2_key_pem
+
 phases:
   install:
     runtime-versions:
       docker: 28
     commands: 
-      -echo "installing dependencies"
-      -yum install -y openssh
+      - echo "Installing dependencies"
+      - yum install -y openssh
+
   pre_build:
     commands:
-      - echo "logging in to ec2"
+      - echo "Logging in to EC2"
+
   build:
     commands:
-     -echo "Deploying to Ec2"
-     -ec2_key_pem > key.pem
-     -chmod 400 key.pem
-     -|
-      ssh -i key.pem -o StrictHostKeyChecking=no ec2_username@ec2_public_ip <<EOF
-       cd/home/ec2-user/flast-app
-       docker stop flaskapp || true
-       docker build -t flaskapp .
-       docker run -d -p 5000:5000 --name Flaskapp flaskapp
+      - echo "Deploying to EC2"
+      - echo "$ec2_pem_key" > key.pem
+      - chmod 400 key.pem
+      - |
+        ssh -i key.pem -o StrictHostKeyChecking=no $ec2_username@$ec2_public_ip <<EOF
+        cd /home/ec2-user/flask-app
+        docker stop flaskapp || true
+        docker rm flaskapp || true
+        docker build -t flaskapp .
+        docker run -d -p 5000:5000 --name flaskapp flaskapp
+        EOF
+
   post_build:
     commands:
       - echo "Build completed successfully!"
